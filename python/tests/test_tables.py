@@ -3326,6 +3326,10 @@ class TestTableCollection:
         s = str(tables)
         assert len(s) > 0
 
+    def test_nbytes_empty_tables(self):
+        tables = tskit.TableCollection(1)
+        assert tables.nbytes == 119
+
     def test_nbytes(self, tmp_path, ts_fixture):
         tables = ts_fixture.dump_tables()
         tables.dump(tmp_path / "tables")
@@ -4816,7 +4820,9 @@ class TestUnionTables(unittest.TestCase):
     def test_union_empty(self):
         tables = self.get_msprime_example(sample_size=3, T=2, seed=9328).dump_tables()
         tables.sort()
-        empty_tables = tskit.TableCollection(sequence_length=tables.sequence_length)
+        empty_tables = tables.copy()
+        for table in empty_tables.table_name_map.keys():
+            getattr(empty_tables, table).clear()
         uni = tables.copy()
         uni.union(empty_tables, [])
         tables.assert_equals(uni, ignore_provenance=True)

@@ -1017,16 +1017,17 @@ class Tree:
         # Deprecated alias for mrca
         return self.mrca(u, v)
 
-    def mrca(self, u, v):
+    def mrca(self, *args):
         """
         Returns the most recent common ancestor of the specified nodes.
 
-        :param int u: The first node.
-        :param int v: The second node.
-        :return: The most recent common ancestor of u and v.
+        :param int `*args`: input node IDs, must be at least 2.
+        :return: The most recent common ancestor of input nodes.
         :rtype: int
         """
-        return self._ll_tree.get_mrca(u, v)
+        if len(args) < 2:
+            raise ValueError("Must supply at least two arguments")
+        return functools.reduce(self._ll_tree.get_mrca, args)
 
     def get_tmrca(self, u, v):
         # Deprecated alias for tmrca
@@ -5235,6 +5236,11 @@ class TreeSequence:
         site **may not** be equal to the reference allele. We also do not
         check that the alleles result in a valid VCF---for example, it is possible
         to use the tab character as an allele, leading to a broken VCF.
+
+        The ID value in the output VCF file is the integer ID of the corresponding
+        :ref:`site <sec_site_table_definition>` (``site.id``). Subsequently,
+        These ID values can be utilized to match the contents of the VCF file
+        to the sites in the tree sequence object.
 
         The ``position_transform`` argument provides a way to flexibly translate
         the genomic location of sites in tskit to the appropriate value in VCF.
